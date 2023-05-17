@@ -36,6 +36,10 @@ add_multiple_users() {
 # Funkcja przypisująca użytkownika do grupy
 add_user_to_group() {
     username=$(zenity --entry --title "Dodaj użytkownika do grupy" --text "Podaj nazwę użytkownika:")
+    if ! id "$username" >/dev/null 2>&1; then
+        zenity --error --title "Błąd" --text "Użytkownik $username nie istnieje."
+        return 1
+    fi
     group_name=$(zenity --entry --title "Dodaj użytkownika do grupy" --text "Podaj nazwę grupy:")
     if ! getent group "$group_name" >/dev/null; then
         zenity --error --title "Błąd" --text "Grupa $group_name nie istnieje."
