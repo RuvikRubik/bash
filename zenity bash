@@ -97,8 +97,43 @@ change_user_password() {
 }
 
 # Funkcja help
-help(){
-    echo "Program pozwala na dodawanie użytkowników i grup dodawanie profili i zmienianie haseł użytkowników"
+display_manual() {
+    echo "NAZWA:"
+    echo "manage_users.sh - Skrypt do zarządzania użytkownikami i grupami w systemie"
+    echo
+    echo "SYNOPIS:"
+    echo "    manage_users.sh [-h] [-v]"
+    echo
+    echo "OPIS:"
+    echo "Skrypt manage_users.sh umożliwia zarządzanie użytkownikami i grupami w systemie za pomocą interfejsu graficznego Zenity."
+    echo
+    echo "Skrypt udostępnia następujące funkcje:"
+    echo "- Dodawanie grupy"
+    echo "- Dodawanie użytkownika"
+    echo "- Dodawanie wielu użytkowników"
+    echo "- Przypisywanie użytkownika do grupy"
+    echo "- Przypisywanie użytkownika do wielu grup"
+    echo "- Tworzenie nowej grupy i przypisywanie użytkownika"
+    echo "- Zmiana ustawień użytkownika (kolor powłoki i katalog domowy)"
+    echo "- Zmiana hasła użytkownika"
+    echo
+    echo "OPCJE:"
+    echo "  -h    Wyświetla pomoc (ten manual)."
+    echo "  -v    Wyświetla informacje o wersji skryptu."
+    echo
+    echo "PRZYKŁADY UŻYCIA:"
+    echo "- Uruchomienie skryptu bez żadnych opcji spowoduje uruchomienie interfejsu graficznego Zenity, który wyświetli menu z dostępnymi funkcjami do wyboru."
+    echo
+    echo "- Uruchomienie skryptu z opcją -h lub --help wyświetli ten manual."
+    echo
+    echo "- Uruchomienie skryptu z opcją -v lub --version wyświetli informacje o wersji skryptu."
+    echo
+    echo "EXIT STATUS:"
+    echo "- 0 OK"
+    echo "- 1 ERROR"
+    echo
+    echo "AUTOR:"
+    echo "Bartosz Kolberg"
 }
 
 # Funkcja podająca aktualną wersję
@@ -107,14 +142,36 @@ version(){
 }
 
 #pętla od opcji
-while getopts "hv" option;do
+while getopts "hv-:" option; do
     case ${option} in
-        h) help
-        ;;
-        v) version
-        ;;
-        \?) echo "Nierozpozano funkcji"
-        ;;
+        h)
+            display_manual
+            exit 0
+            ;;
+        v)
+            echo "Wersja skryptu: 1.0"
+            exit 0
+            ;;
+        -)
+            case ${OPTARG} in
+                help)
+                    display_manual
+                    exit 0
+                    ;;
+                version)
+                    echo "Wersja skryptu: 1.0"
+                    exit 0
+                    ;;
+                *)
+                    echo "Nieznana opcja: --${OPTARG}"
+                    exit 1
+                    ;;
+            esac
+            ;;
+        \?)
+            echo "Nierozpoznana opcja: -$OPTARG"
+            exit 1
+            ;;
     esac
 done
 
@@ -174,3 +231,4 @@ while true; do
 
     echo
 done
+exit 0
