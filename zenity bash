@@ -37,6 +37,10 @@ add_multiple_users() {
 add_user_to_group() {
     username=$(zenity --entry --title "Dodaj użytkownika do grupy" --text "Podaj nazwę użytkownika:")
     group_name=$(zenity --entry --title "Dodaj użytkownika do grupy" --text "Podaj nazwę grupy:")
+    if ! getent group "$group_name" >/dev/null; then
+        zenity --error --title "Błąd" --text "Grupa $group_name nie istnieje."
+        return 1
+    fi
     if [ $? -eq 0 ]; then
         sudo usermod -a -G $group_name $username
         zenity --info --title "Sukces" --text "Użytkownik $username został przypisany do grupy $group_name."
@@ -50,6 +54,10 @@ add_user_to_multiple_groups() {
     if [ $? -eq 0 ]; then
         IFS=' ' read -r -a groups_array <<< "$groups"
         for group in "${groups_array[@]}"; do
+            if ! getent group "$group" >/dev/null; then
+                zenity --error --title "Błąd" --text "Grupa $group_name nie istnieje."
+                return 1
+            fi
             sudo usermod -a -G $group $username
             zenity --info --title "Sukces" --text "Użytkownik $username został przypisany do grupy $group."
         done
@@ -59,6 +67,10 @@ add_user_to_multiple_groups() {
 # Funkcja tworząca nową grupę i przypisująca użytkownika
 add_user_to_new_group() {
     username=$(zenity --entry --title "Dodaj użytkownika do nowej grupy" --text "Podaj nazwę użytkownika:")
+    if ! id "$username" >/dev/null 2>&1; then
+        zenity --error --title "Błąd" --text "Użytkownik $username nie istnieje."
+        return 1
+    fi
     new_group=$(zenity --entry --title "Dodaj użytkownika do nowej grupy" --text "Podaj nazwę nowej grupy:")
     if [ $? -eq 0 ]; then
         sudo groupadd $new_group
@@ -69,6 +81,10 @@ add_user_to_new_group() {
 
 change_user_settings() {
     username=$(zenity --entry --title "Zmień ustawienia użytkownika" --text "Podaj nazwę użytkownika:")
+    if ! id "$username" >/dev/null 2>&1; then
+        zenity --error --title "Błąd" --text "Użytkownik $username nie istnieje."
+        return 1
+    fi
     if id "$username" &>/dev/null; then
         color=$(zenity --entry --title "Zmień ustawienia użytkownika" --text "Podaj nowy kolor powłoki (np. 'red', 'green', 'blue'):")
         home_directory=$(zenity --file-selection --directory --title "Zmień ustawienia użytkownika" --text "Wybierz nowy katalog domowy:")
@@ -88,6 +104,10 @@ change_user_settings() {
 # Funkcja zmieniająca hasło użytkownika
 change_user_password() {
     username=$(zenity --entry --title "Zmień hasło użytkownika" --text "Podaj nazwę użytkownika:")
+    if ! id "$username" >/dev/null 2>&1; then
+        zenity --error --title "Błąd" --text "Użytkownik $username nie istnieje."
+        return 1
+    fi
     if id "$username" &>/dev/null; then
         zenity --password --title "Zmień hasło użytkownika" --text "Podaj nowe hasło dla użytkownika $username" | sudo passwd $username --stdin
         zenity --info --title "Sukces" --text "Hasło użytkownika $username zostało zmienione."
