@@ -1,0 +1,60 @@
+#!/bin/bash
+
+# Funkcja zmieniająca ustawienia użytkownika
+change_user_settings() {
+    username=$(zenity --entry --title "Zmień ustawienia użytkownika" --text "Podaj nazwę użytkownika:")
+    if id "$username" &>/dev/null; then
+        color=$(zenity --entry --title "Zmień ustawienia użytkownika" --text "Podaj nowy kolor powłoki (np. 'red', 'green', 'blue'):")
+        home_directory=$(zenity --file-selection --directory --title "Zmień ustawienia użytkownika" --text "Wybierz nowy katalog domowy:")
+
+        # Zmiana koloru powłoki
+        sed -i "s/PS1='\(.*\)\\\[.*\]$/PS1='\1\\[${color}\]'/g" /home/$username/.bashrc
+
+        # Zmiana katalogu domowego
+        sudo usermod -d $home_directory $username
+
+        zenity --info --title "Sukces" --text "Ustawienia dla użytkownika $username zostały zmienione."
+    else
+        zenity --error --title "Błąd" --text "Użytkownik $username nie istnieje."
+    fi
+}
+
+# Funkcja zmieniająca hasło użytkownika
+change_user_password() {
+    username=$(zenity --entry --title "Zmień hasło użytkownika" --text "Podaj nazwę użytkownika:")
+    if id "$username" &>/dev/null; then
+        zenity --password --title "Zmień hasło użytkownika" --text "Podaj nowe hasło dla użytkownika $username" | sudo passwd $username --stdin
+        zenity --info --title "Sukces" --text "Hasło użytkownika $username zostało zmienione."
+    else
+        zenity --error --title "Błąd" --text "Użytkownik $username nie istnieje."
+    fi
+}
+
+# Główna pętla menu
+while true; do
+    option=$(zenity --list --title "Menu" --text "Wybierz opcję:" --column "Opcja" --column "Opis" \
+        "Zmień ustawienia użytkownika" "Zmień kolor powłoki i katalog domowy użytkownika" \
+        "Zmień hasło użytkownika" "Zmień hasło dostępu użytkownika" \
+        "Wyjdź")
+
+    if [ $? -ne 0 ]; then
+        break
+    fi
+
+    case $option in
+        "Zmień ustawienia użytkownika")
+            change_user_settings
+            ;;
+        "Zmień hasło użytkownika")
+            change_user_password
+            ;;
+        "Wyjdź")
+            break
+            ;;
+        *)
+            zenity --error --title "Błąd" --text "Nieprawidłowa opcja."
+            ;;
+    esac
+
+    echo
+done
