@@ -1,0 +1,111 @@
+#!/bin/bash
+
+# Funkcja dodająca grupę
+add_group() {
+    group_name=$(zenity --entry --title "Dodaj grupę" --text "Podaj nazwę grupy:")
+    if [ $? -eq 0 ]; then
+        sudo groupadd $group_name
+        zenity --info --title "Sukces" --text "Grupa $group_name została utworzona."
+    fi
+}
+
+# Funkcja dodająca użytkownika
+add_user() {
+    username=$(zenity --entry --title "Dodaj użytkownika" --text "Podaj nazwę użytkownika:")
+    if [ $? -eq 0 ]; then
+        sudo useradd $username
+        zenity --info --title "Sukces" --text "Użytkownik $username został utworzony."
+    fi
+}
+
+# Funkcja dodająca wielu użytkowników
+add_multiple_users() {
+    base_name=$(zenity --entry --title "Dodaj wielu użytkowników" --text "Podaj nazwę bazową użytkowników:")
+    count=$(zenity --entry --title "Dodaj wielu użytkowników" --text "Podaj liczbę użytkowników do utworzenia:")
+    if [ $? -eq 0 ]; then
+        for ((i=1; i<=count; i++)); do
+            username="${base_name}${i}"
+            sudo useradd $username
+            zenity --info --title "Sukces" --text "Użytkownik $username został utworzony."
+        done
+    fi
+}
+
+# Funkcja przypisująca użytkownika do grupy
+add_user_to_group() {
+    username=$(zenity --entry --title "Dodaj użytkownika do grupy" --text "Podaj nazwę użytkownika:")
+    group_name=$(zenity --entry --title "Dodaj użytkownika do grupy" --text "Podaj nazwę grupy:")
+    if [ $? -eq 0 ]; then
+        sudo usermod -a -G $group_name $username
+        zenity --info --title "Sukces" --text "Użytkownik $username został przypisany do grupy $group_name."
+    fi
+}
+
+# Funkcja przypisująca użytkownika do wielu grup
+add_user_to_multiple_groups() {
+    username=$(zenity --entry --title "Dodaj użytkownika do wielu grup" --text "Podaj nazwę użytkownika:")
+    groups=$(zenity --entry --title "Dodaj użytkownika do wielu grup" --text "Podaj listę grup oddzieloną spacją:")
+    if [ $? -eq 0 ]; then
+        IFS=' ' read -r -a groups_array <<< "$groups"
+        for group in "${groups_array[@]}"; do
+            sudo usermod -a -G $group $username
+            zenity --info --title "Sukces" --text "Użytkownik $username został przypisany do grupy $group."
+        done
+    fi
+}
+
+# Funkcja tworząca nową grupę i przypisująca użytkownika
+add_user_to_new_group() {
+    username=$(zenity --entry --title "Dodaj użytkownika do nowej grupy" --text "Podaj nazwę użytkownika:")
+    new_group=$(zenity --entry --title "Dodaj użytkownika do nowej grupy" --text "Podaj nazwę nowej grupy:")
+    if [ $? -eq 0 ]; then
+        sudo groupadd $new_group
+        sudo usermod -a -G $new_group $username
+        zenity --info --title "Sukces" --text "Grupa $new_group została utworzona, a użytkownik $username został do niej przypisany."
+    fi
+}
+
+# Główna pętla menu
+while true; do
+    option=$(zenity --list --title "Menu" --text "Wybierz opcję:" --column "Opcja" --column "Opis" \
+        "Dodaj grupę" "Dodaj nową grupę" \
+        "Dodaj użytkownika" "Dodaj nowego użytkownika" \
+        "Dodaj wielu użytkowników" "Dodaj wielu użytkowników" \
+        "Dodaj użytkownika do grupy" "Przypisz użytkownika do istniejącej grupy" \
+        "Dodaj użytkownika do wielu grup" "Przypisz użytkownika do wielu istniejących grup" \
+        "Dodaj użytkownika do nowej grupy" "Utwórz nową grupę i przypisz użytkownika" \
+        "Wyjdź")
+
+    if [ $? -ne 0 ]; then
+        break
+    fi
+
+    case $option in
+        "Dodaj grupę")
+            add_group
+            ;;
+        "Dodaj użytkownika")
+            add_user
+            ;;
+        "Dodaj wielu użytkowników")
+            add_multiple_users
+            ;;
+        "Dodaj użytkownika do grupy")
+            add_user_to_group
+            ;;
+        "Dodaj użytkownika do wielu grup")
+            add_user_to_multiple_groups
+            ;;
+        "Dodaj użytkownika do nowej grupy")
+            add_user_to_new_group
+            ;;
+        "Wyjdź")
+            break
+            ;;
+        *)
+            zenity --error --title "Błąd" --text "Nieprawidłowa opcja."
+            ;;
+    esac
+
+    echo
+done
