@@ -1,4 +1,6 @@
 #!/bin/bash
+help_option=0
+version_option=0
 
 # Funkcja dodająca grupę
 add_group() {
@@ -94,20 +96,32 @@ change_user_password() {
     fi
 }
 
+# Funkcja help
 help(){
-
+    echo "Program pozwala na dodawanie użytkowników i grup dodawanie profili i zmienianie haseł użytkowników"
 }
+
+# Funkcja podająca aktualną wersję
 version(){
-    echo "Wersja "
+    echo "Wersja 1.0"
 }
 
+#pętla od opcji
 while getopts "hv" option;do
     case ${option} in
-        h)help;;
-        v)version;;
-        \?)echo"Nierozpozano funkcji"
+        h) help
+        ;;
+        v) version
+        ;;
+        \?) echo "Nierozpozano funkcji"
+        ;;
     esac
 done
+
+if [[ $help_option -eq 1 || $version_option -eq 1 ]]; then
+    exit
+fi
+
 # Główna pętla menu
 while true; do
     option=$(zenity --width=800 --height=600 --list --title "Menu" --text "Wybierz opcję:" --column "Opcja" --column "Opis" \
