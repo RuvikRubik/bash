@@ -96,7 +96,7 @@ change_user_password() {
 
 # Główna pętla menu
 while true; do
-    option=$(zenity --list --title "Menu" --text "Wybierz opcję:" --column "Opcja" --column "Opis" \
+    option=$(zenity --width=800 --height=600 --list --title "Menu" --text "Wybierz opcję:" --column "Opcja" --column "Opis" \
         "Dodaj grupę" "Dodaj nową grupę" \
         "Dodaj użytkownika" "Dodaj nowego użytkownika" \
         "Dodaj wielu użytkowników" "Dodaj wielu użytkowników" \
