@@ -94,6 +94,20 @@ change_user_password() {
     fi
 }
 
+help(){
+
+}
+version(){
+    echo "Wersja "
+}
+
+while getopts "hv" option;do
+    case ${option} in
+        h)help;;
+        v)version;;
+        \?)echo"Nierozpozano funkcji"
+    esac
+done
 # Główna pętla menu
 while true; do
     option=$(zenity --width=800 --height=600 --list --title "Menu" --text "Wybierz opcję:" --column "Opcja" --column "Opis" \
