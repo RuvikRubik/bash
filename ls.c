@@ -47,14 +47,18 @@ void listFiles(const char* dirPath, int recursive, int displayDetails) {
             char dateModified[20];
             strftime(dateModified, sizeof(dateModified), "%Y-%m-%d %H:%M:%S", localtime(&fileStat.st_mtime));
 
-            printf("  Permissions: %o\n", fileStat.st_mode & 0777);
-            printf("  Owner: %s\n", pw->pw_name);
-            printf("  Group: %s\n", gr->gr_name);
-            printf("  Size: %ld bytes\n", fileStat.st_size);
-            printf("  Last Modified: %s\n", dateModified);
+            printf("  %o", fileStat.st_mode & 0777);
+            if(!owner){
+                printf("  %s", pw->pw_name);
+            }
+            if(!group){
+               printf("  %s", gr->gr_name); 
+            }
+            printf("  %ld", fileStat.st_size);
+            printf("  %s ", dateModified);
         }
     }
-
+    printf("\n");
     closedir(dir);
 }
 
@@ -66,6 +70,12 @@ int main(int argc, char* argv[]) {
     for (int i = 1; i < argc; i++) {
         if (strcmp(argv[i], "-l") == 0) {
             displayDetails = 1;
+        }
+        else if (strcmp(argv[i], "-o") == 0) {
+            group = 1;
+        }
+        else if (strcmp(argv[i], "-g") == 0) {
+            owner = 1;
         }
         else if (strcmp(argv[i], "-R") == 0) {
             recursive = 1;
