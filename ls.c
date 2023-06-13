@@ -9,6 +9,19 @@
 #include <grp.h>
 #include <time.h>
 
+void printPermissions(mode_t mode) {
+    printf((S_ISDIR(mode)) ? "d" : "-");
+    printf((mode & S_IRUSR) ? "r" : "-");
+    printf((mode & S_IWUSR) ? "w" : "-");
+    printf((mode & S_IXUSR) ? "x" : "-");
+    printf((mode & S_IRGRP) ? "r" : "-");
+    printf((mode & S_IWGRP) ? "w" : "-");
+    printf((mode & S_IXGRP) ? "x" : "-");
+    printf((mode & S_IROTH) ? "r" : "-");
+    printf((mode & S_IWOTH) ? "w" : "-");
+    printf((mode & S_IXOTH) ? "x" : "-");
+}
+
 void listFiles(const char* dirPath, int recursive, int displayDetails) {
     DIR* dir = opendir(dirPath);
     if (dir == NULL) {
@@ -29,7 +42,11 @@ void listFiles(const char* dirPath, int recursive, int displayDetails) {
             }
         }
         else {
-            printf("%s/%s\n", dirPath, entry->d_name);
+            if(size){
+                printf("%s/%s %lld\n", dirPath, entry->d_name,(long long)fileStat.st_blocks);
+            }else{
+                printf("%s/%s\n", dirPath, entry->d_name);
+            }          
         }
 
         if (displayDetails) {
@@ -46,8 +63,7 @@ void listFiles(const char* dirPath, int recursive, int displayDetails) {
             struct group* gr = getgrgid(fileStat.st_gid);
             char dateModified[20];
             strftime(dateModified, sizeof(dateModified), "%Y-%m-%d %H:%M:%S", localtime(&fileStat.st_mtime));
-
-            printf("  %o", fileStat.st_mode & 0777);
+            printPermissions(fileStat.st_mode);
             if(!owner){
                 printf("  %s", pw->pw_name);
             }
@@ -76,6 +92,9 @@ int main(int argc, char* argv[]) {
         }
         else if (strcmp(argv[i], "-g") == 0) {
             owner = 1;
+        }
+        else if (strcmp(argv[i], "-s") == 0) {
+            size = 1;
         }
         else if (strcmp(argv[i], "-R") == 0) {
             recursive = 1;
